@@ -104,8 +104,8 @@ export default function Home() {
           <p>Generate production-ready PNG, ICO, and ICNS assets with consistent defaults.</p>
         </div>
         <div className="header-actions">
-          <div className="web-badge" title="Synthetic data only; no API connection">
-            <span aria-hidden="true" /> Web showcase · Offline
+          <div className="web-badge" title="Public synthetic demo; no ChatGPT account or API connection required">
+            <span aria-hidden="true" /> Synthetic demo · No sign-in
           </div>
           <a
             className="download-button"
@@ -164,7 +164,7 @@ export default function Home() {
         </details>
 
         <p className={`feedback ${isComplete ? 'success' : ''}`} role="status">
-          <span aria-hidden="true">●</span> {feedback}
+          <span aria-hidden="true">●</span> {feedback} No ChatGPT connection is required.
         </p>
       </section>
 
