@@ -333,8 +333,8 @@ export default function Home() {
               <div className="large-icon-preview">
                 <Image
                   src="/shipicon-demo-source.png"
-                  width={216}
-                  height={216}
+                  width={384}
+                  height={384}
                   alt="Generated icon preview"
                 />
               </div>
