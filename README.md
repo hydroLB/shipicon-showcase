@@ -28,3 +28,9 @@ npm run build
 
 The production site is static in behavior: it requires no database, account, upload storage, or AI
 service. The desktop application remains the only ShipIcon surface allowed to connect to OpenAI.
+
+## Interaction model
+
+The showcase uses progressive disclosure: the project summary and primary generation action are
+visible at rest, while technical paths, export-size details, generated assets, and the activity log
+appear only when they are relevant.

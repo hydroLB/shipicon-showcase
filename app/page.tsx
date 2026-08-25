@@ -28,30 +28,6 @@ function sleep(milliseconds: number) {
   return new Promise((resolve) => window.setTimeout(resolve, milliseconds));
 }
 
-function PathRow({
-  label,
-  value,
-  action = 'Browse…',
-  onAction,
-}: {
-  label: string;
-  value: string;
-  action?: string;
-  onAction: () => void;
-}) {
-  return (
-    <div className="path-row">
-      <label>{label}</label>
-      <div className="path-controls">
-        <input aria-label={label} value={value} readOnly />
-        <button type="button" className="toolbar-button" onClick={onAction}>
-          {action}
-        </button>
-      </div>
-    </div>
-  );
-}
-
 export default function Home() {
   const [buildState, setBuildState] = useState<BuildState>('ready');
   const [progress, setProgress] = useState(0);
@@ -141,144 +117,165 @@ export default function Home() {
         </div>
       </header>
 
-      <fieldset className="card settings-card">
-        <legend>Project settings</legend>
-        <PathRow
-          label="Project folder"
-          value="synthetic://shipicon-showcase"
-          onAction={() => setShowSamples(true)}
-        />
-        <PathRow
-          label="Output folder"
-          value="browser-workspace/shipicon-build"
-          onAction={() => setFeedback('The web showcase uses a temporary in-browser workspace.')}
-        />
-        <div className="field-row">
-          <label htmlFor="app-name">App name</label>
-          <input
-            id="app-name"
-            value={appName}
-            maxLength={64}
-            onChange={(event) => setAppName(event.target.value)}
-          />
+      <section className="card setup-card" aria-labelledby="setup-title">
+        <div className="section-heading">
+          <div>
+            <span className="eyebrow">Step 1</span>
+            <h2 id="setup-title">Choose the input</h2>
+          </div>
+          <button type="button" className="toolbar-button" onClick={() => setShowSamples(true)}>
+            Change sample…
+          </button>
         </div>
-        <div className="inline-row source-row">
-          <label htmlFor="source-mode">Source</label>
-          <select id="source-mode" defaultValue="existing">
-            <option value="existing">Existing image</option>
-            <option value="ai" disabled>AI generation — desktop app only</option>
-          </select>
-          <span className="source-note">AI credentials are never accepted by this website.</span>
-        </div>
-        <PathRow
-          label="Source image"
-          value="synthetic-assets/shipicon-demo-source.png"
-          action="Choose image…"
-          onAction={() => setShowSamples(true)}
-        />
-        <div className="inline-row candidate-row">
-          <strong>Candidates</strong>
-          <input aria-label="Candidate count" type="number" value="1" readOnly />
-          <strong>Pick</strong>
-          <select aria-label="Candidate selection" value="best" disabled>
-            <option>best</option>
-          </select>
-        </div>
-        <p className={`feedback ${isComplete ? 'success' : ''}`} role="status">
-          {feedback}
-        </p>
-      </fieldset>
 
-      <section className="workspace-grid">
-        <fieldset className="card preview-card">
-          <legend>Preview</legend>
-          <button className="hero-preview" type="button" onClick={() => setPreview('icon')}>
+        <div className="setup-grid">
+          <div className="setup-item">
+            <span>Project</span>
+            <strong>Synthetic ShipIcon project</strong>
+            <small>Python · desktop utility</small>
+          </div>
+          <label className="setup-item" htmlFor="app-name">
+            <span>App name</span>
+            <input
+              id="app-name"
+              value={appName}
+              maxLength={64}
+              onChange={(event) => setAppName(event.target.value)}
+            />
+          </label>
+          <button type="button" className="setup-item source-summary" onClick={() => setShowSamples(true)}>
+            <Image src="/shipicon-demo-source.png" width={42} height={42} alt="" />
+            <span>
+              <small>Source artwork</small>
+              <strong>Existing synthetic image</strong>
+              <em>Change artwork</em>
+            </span>
+          </button>
+        </div>
+
+        <details className="technical-details">
+          <summary>Technical setup</summary>
+          <div className="technical-grid">
+            <div><span>Project folder</span><code>synthetic://shipicon-showcase</code></div>
+            <div><span>Workspace</span><code>browser-workspace/shipicon-build</code></div>
+            <div><span>Source mode</span><code>Existing image · 1 candidate · best</code></div>
+            <div><span>AI access</span><code>Disabled on the web</code></div>
+          </div>
+        </details>
+
+        <p className={`feedback ${isComplete ? 'success' : ''}`} role="status">
+          <span aria-hidden="true">●</span> {feedback}
+        </p>
+      </section>
+
+      <section className="card focus-workspace" aria-label="Icon generation workspace">
+        <div className="focus-preview">
+          <span className="eyebrow">Live preview</span>
+          <button type="button" className="icon-stage" onClick={() => setPreview('icon')}>
             <Image
               src="/shipicon-demo-source.png"
-              width={74}
-              height={74}
+              width={148}
+              height={148}
               alt={`${appName || 'ShipIcon'} synthetic icon preview`}
               priority
             />
-            <span>Open preview</span>
+            <span>Open larger preview</span>
           </button>
-          <div className="preview-sizes">
-            <h2>Preview sizes</h2>
+          <h2>{appName || 'Untitled app'}</h2>
+          <p>One source, nine production sizes.</p>
+
+          <details className="size-disclosure">
+            <summary>See all export sizes</summary>
             <div className="size-grid">
               {previewSizes.map((size) => (
                 <figure key={size}>
-                  <div><Image src="/shipicon-demo-source.png" width={36} height={36} alt="" /></div>
+                  <div><Image src="/shipicon-demo-source.png" width={32} height={32} alt="" /></div>
                   <figcaption>{size}px</figcaption>
                 </figure>
               ))}
             </div>
-          </div>
-        </fieldset>
+          </details>
+        </div>
 
-        <fieldset className="card assets-card">
-          <legend>Generated assets</legend>
-          {[
-            ['Output folder', 'browser-workspace/shipicon-build', 'icon'],
-            ['Manifest', 'shipicon-manifest.json', 'manifest'],
-            ['PNG', 'icon.png', 'icon'],
-            ['ICO', 'icon.ico', 'icon'],
-            ['ICNS', 'icon.icns', 'icon'],
-          ].map(([label, value, kind]) => (
-            <div className="asset-row" key={label}>
-              <label>{label}</label>
-              <input aria-label={label} value={isComplete ? value : 'Not generated yet'} readOnly />
+        <div className={`action-panel ${buildState}`} aria-live="polite">
+          {buildState === 'ready' && (
+            <>
+              <span className="eyebrow">Step 2</span>
+              <h2>Generate the icon set</h2>
+              <p>Run ShipIcon&apos;s synthetic workflow and inspect the same outputs the desktop app creates.</p>
+              <ul className="trust-list">
+                <li><span>0</span> network requests</li>
+                <li><span>3</span> production formats</li>
+                <li><span>9</span> preview sizes</li>
+              </ul>
               <button
                 type="button"
-                className="toolbar-button"
-                disabled={!isComplete}
-                onClick={() => setPreview(kind as PreviewKind)}
+                className="primary-button action-primary"
+                disabled={!appName.trim()}
+                onClick={() => void runBuild()}
               >
-                Preview
+                Generate icons
               </button>
-            </div>
-          ))}
-          <p className="asset-note">
-            {isComplete
-              ? 'Assets are ready to preview. Product downloads always contain the full desktop application.'
-              : 'Generate the synthetic icon set to populate this panel.'}
-          </p>
-        </fieldset>
+              <small>Ctrl/⌘ + Enter</small>
+            </>
+          )}
+
+          {buildState === 'building' && (
+            <>
+              <span className="eyebrow">Building</span>
+              <div className="working-mark" aria-hidden="true"><span /></div>
+              <h2>{status}</h2>
+              <p>Everything is happening locally with bundled synthetic data.</p>
+              <div
+                className="progress-track large"
+                role="progressbar"
+                aria-label="Build progress"
+                aria-valuenow={progress}
+                aria-valuemin={0}
+                aria-valuemax={100}
+              >
+                <span style={{ width: `${progress}%` }} />
+              </div>
+              <strong className="progress-value">{progress}%</strong>
+            </>
+          )}
+
+          {buildState === 'complete' && (
+            <>
+              <span className="eyebrow success-text">Build complete</span>
+              <h2>Generated assets</h2>
+              <p>Inspect the real output structure produced by the synthetic workflow.</p>
+              <div className="result-list">
+                {[
+                  ['PNG', '1024px RGBA', 'icon'],
+                  ['ICO', '7 Windows sizes', 'icon'],
+                  ['ICNS', '8 Apple representations', 'icon'],
+                  ['Manifest', 'Auditable JSON', 'manifest'],
+                ].map(([label, detail, kind]) => (
+                  <button type="button" key={label} onClick={() => setPreview(kind as PreviewKind)}>
+                    <strong>{label}</strong><span>{detail}</span><em>Preview</em>
+                  </button>
+                ))}
+              </div>
+              <div className="complete-actions">
+                <button type="button" className="secondary-button" onClick={resetBuild}>Start over</button>
+                <a
+                  className="download-button"
+                  href="https://github.com/hydroLB/shipcon_icon/releases/latest"
+                  rel="noreferrer"
+                >
+                  Get the full app
+                </a>
+              </div>
+            </>
+          )}
+        </div>
       </section>
 
-      <fieldset className="card status-card">
-        <legend>Run status</legend>
-        <p>{status}</p>
-        <div
-          className="progress-track"
-          role="progressbar"
-          aria-label="Build progress"
-          aria-valuenow={progress}
-          aria-valuemin={0}
-          aria-valuemax={100}
-        >
-          <span style={{ width: `${progress}%` }} />
-        </div>
-        <div className="actions">
-          <span>Shortcut: Ctrl/⌘ + Enter</span>
-          {isComplete && (
-            <button type="button" className="secondary-button" onClick={resetBuild}>Reset</button>
-          )}
-          <button
-            type="button"
-            className="primary-button"
-            disabled={buildState === 'building' || !appName.trim()}
-            onClick={() => void runBuild()}
-          >
-            {buildState === 'building' ? 'Generating…' : 'Generate icons'}
-          </button>
-          <button type="button" className="secondary-button" disabled>Cancel</button>
-        </div>
-      </fieldset>
-
-      <fieldset className="card log-card">
-        <legend>Activity log</legend>
+      <details className="diagnostics card">
+        <summary>Activity and privacy details</summary>
         <pre aria-live="polite">{logs.join('\n')}</pre>
-      </fieldset>
+      </details>
 
       {showSamples && (
         <div className="modal-backdrop" role="presentation" onMouseDown={() => setShowSamples(false)}>
