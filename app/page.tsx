@@ -2,13 +2,14 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 
 type BuildState = 'ready' | 'building' | 'complete';
 type PreviewKind = 'icon' | 'manifest';
 
 const previewSizes = [16, 24, 32, 48, 64, 128, 256, 512, 1024];
 const buildSteps = [
-  [12, 'Scanning synthetic project context…'],
+  [12, 'Scanning sample project…'],
   [34, 'Creating deterministic visual brief…'],
   [62, 'Normalizing source artwork…'],
   [84, 'Encoding PNG, ICO, and ICNS assets…'],
@@ -18,7 +19,7 @@ const buildSteps = [
 const manifest = `{
   "schema_version": 1,
   "app_name": "ShipIcon",
-  "source": "synthetic",
+  "source": "demo",
   "network_requests": 0,
   "formats": ["png", "ico", "icns"],
   "status": "complete"
@@ -31,16 +32,13 @@ function sleep(milliseconds: number) {
 export default function Home() {
   const [buildState, setBuildState] = useState<BuildState>('ready');
   const [progress, setProgress] = useState(0);
-  const [status, setStatus] = useState('Ready with synthetic project.');
-  const [feedback, setFeedback] = useState(
-    'Synthetic project loaded. This showcase never connects to AI.',
-  );
+  const [status, setStatus] = useState('Ready.');
+  const [feedback, setFeedback] = useState('Ready.');
   const [appName, setAppName] = useState('ShipIcon');
   const [preview, setPreview] = useState<PreviewKind | null>(null);
   const [showSamples, setShowSamples] = useState(false);
   const [logs, setLogs] = useState([
-    'SHOWCASE Synthetic project context loaded.',
-    'PRIVACY No project data has left this browser.',
+    'SHOWCASE Sample project loaded.',
   ]);
   const alive = useRef(true);
 
@@ -52,9 +50,9 @@ export default function Home() {
     if (buildState === 'building') return;
     setBuildState('building');
     setProgress(3);
-    setStatus('Preparing synthetic build…');
-    setFeedback('Offline showcase build in progress. No network requests are made.');
-    setLogs(['INFO shipicon.pipeline: Starting synthetic icon generation.']);
+    setStatus('Preparing build…');
+    setFeedback('Generating icon set…');
+    setLogs(['INFO shipicon.pipeline: Starting icon generation.']);
 
     for (const [nextProgress, message] of buildSteps) {
       await sleep(420);
@@ -65,18 +63,15 @@ export default function Home() {
     }
 
     setBuildState('complete');
-    setFeedback('Icon generation completed successfully using synthetic data.');
+    setFeedback('Icon set generated.');
   }
 
   function resetBuild() {
     setBuildState('ready');
     setProgress(0);
-    setStatus('Ready with synthetic project.');
-    setFeedback('Synthetic project loaded. This showcase never connects to AI.');
-    setLogs([
-      'SHOWCASE Synthetic project context loaded.',
-      'PRIVACY No project data has left this browser.',
-    ]);
+    setStatus('Ready.');
+    setFeedback('Ready.');
+    setLogs(['SHOWCASE Sample project loaded.']);
   }
 
   useEffect(() => {
@@ -104,9 +99,10 @@ export default function Home() {
           <p>Generate production-ready PNG, ICO, and ICNS assets with consistent defaults.</p>
         </div>
         <div className="header-actions">
-          <div className="web-badge" title="Public synthetic demo; no ChatGPT account or API connection required">
-            <span aria-hidden="true" /> Synthetic demo · No sign-in
+          <div className="web-badge" title="Using sample data">
+            <span aria-hidden="true" /> Demo mode
           </div>
+          <Link className="connect-button" href="/connect">Connect OpenAI</Link>
           <a
             className="download-button"
             href="https://github.com/hydroLB/shipcon_icon/releases/latest"
@@ -131,7 +127,7 @@ export default function Home() {
         <div className="setup-grid">
           <div className="setup-item">
             <span>Project</span>
-            <strong>Synthetic ShipIcon project</strong>
+            <strong>ShipIcon sample project</strong>
             <small>Python · desktop utility</small>
           </div>
           <label className="setup-item" htmlFor="app-name">
@@ -147,7 +143,7 @@ export default function Home() {
             <Image src="/shipicon-demo-source.png" width={42} height={42} alt="" />
             <span>
               <small>Source artwork</small>
-              <strong>Existing synthetic image</strong>
+              <strong>Sample artwork</strong>
               <em>Change artwork</em>
             </span>
           </button>
@@ -156,15 +152,15 @@ export default function Home() {
         <details className="technical-details">
           <summary>Technical setup</summary>
           <div className="technical-grid">
-            <div><span>Project folder</span><code>synthetic://shipicon-showcase</code></div>
+            <div><span>Project folder</span><code>demo://shipicon-showcase</code></div>
             <div><span>Workspace</span><code>browser-workspace/shipicon-build</code></div>
             <div><span>Source mode</span><code>Existing image · 1 candidate · best</code></div>
-            <div><span>AI access</span><code>Disabled on the web</code></div>
+            <div><span>Build mode</span><code>Demo</code></div>
           </div>
         </details>
 
         <p className={`feedback ${isComplete ? 'success' : ''}`} role="status">
-          <span aria-hidden="true">●</span> {feedback} No ChatGPT connection is required.
+          <span aria-hidden="true">●</span> {feedback}
         </p>
       </section>
 
@@ -176,7 +172,7 @@ export default function Home() {
               src="/shipicon-demo-source.png"
               width={148}
               height={148}
-              alt={`${appName || 'ShipIcon'} synthetic icon preview`}
+              alt={`${appName || 'ShipIcon'} icon preview`}
               priority
             />
             <span>Open larger preview</span>
@@ -202,9 +198,9 @@ export default function Home() {
             <>
               <span className="eyebrow">Step 2</span>
               <h2>Generate the icon set</h2>
-              <p>Run ShipIcon&apos;s synthetic workflow and inspect the same outputs the desktop app creates.</p>
+              <p>Run the sample workflow and inspect the same outputs the desktop app creates.</p>
               <ul className="trust-list">
-                <li><span>0</span> network requests</li>
+                <li><span>1</span> sample project</li>
                 <li><span>3</span> production formats</li>
                 <li><span>9</span> preview sizes</li>
               </ul>
@@ -225,7 +221,7 @@ export default function Home() {
               <span className="eyebrow">Building</span>
               <div className="working-mark" aria-hidden="true"><span /></div>
               <h2>{status}</h2>
-              <p>Everything is happening locally with bundled synthetic data.</p>
+              <p>Building the sample icon set.</p>
               <div
                 className="progress-track large"
                 role="progressbar"
@@ -244,7 +240,7 @@ export default function Home() {
             <>
               <span className="eyebrow success-text">Build complete</span>
               <h2>Generated assets</h2>
-              <p>Inspect the real output structure produced by the synthetic workflow.</p>
+              <p>Inspect the output structure produced by the demo workflow.</p>
               <div className="result-list">
                 {[
                   ['PNG', '1024px RGBA', 'icon'],
@@ -273,7 +269,7 @@ export default function Home() {
       </section>
 
       <details className="diagnostics card">
-        <summary>Activity and privacy details</summary>
+        <summary>Activity details</summary>
         <pre aria-live="polite">{logs.join('\n')}</pre>
       </details>
 
@@ -288,7 +284,7 @@ export default function Home() {
           >
             <div className="dialog-header">
               <div>
-                <span className="eyebrow">Synthetic data</span>
+                <span className="eyebrow">Demo mode</span>
                 <h2 id="sample-title">Showcase project</h2>
               </div>
               <button type="button" className="close-button" onClick={() => setShowSamples(false)} aria-label="Close">×</button>
@@ -298,19 +294,19 @@ export default function Home() {
                 src="/shipicon-demo-source.png"
                 width={76}
                 height={76}
-                alt="ShipIcon synthetic project artwork"
+                alt="ShipIcon sample project artwork"
               />
               <div>
                 <strong>ShipIcon sample project</strong>
-                <p>A bundled, non-sensitive project snapshot used only to demonstrate the workflow.</p>
-                <span>Python · Desktop utility · 0 network requests</span>
+                <p>A bundled sample project for exploring the workflow.</p>
+                <span>Python · Desktop utility · Bundled sample</span>
               </div>
             </div>
             <button type="button" className="primary-button dialog-action" onClick={() => {
               resetBuild();
               setShowSamples(false);
-              setFeedback('Synthetic ShipIcon project selected.');
-            }}>Use synthetic project</button>
+              setFeedback('Sample project selected.');
+            }}>Use sample project</button>
           </section>
         </div>
       )}
@@ -339,11 +335,11 @@ export default function Home() {
                   src="/shipicon-demo-source.png"
                   width={216}
                   height={216}
-                  alt="Synthetic generated icon"
+                  alt="Generated icon preview"
                 />
               </div>
             )}
-            <p className="dialog-note">Synthetic preview only. Download the full desktop app to process your own project.</p>
+            <p className="dialog-note">Download the full desktop app to process your own project.</p>
           </section>
         </div>
       )}
