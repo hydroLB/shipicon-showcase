@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
-import Link from 'next/link';
 
 type BuildState = 'ready' | 'building' | 'complete';
 
@@ -106,10 +105,17 @@ export default function Home() {
           <p>Generate production-ready PNG, ICO, and ICNS assets with consistent defaults.</p>
         </div>
         <div className="header-actions">
-          <div className="web-badge" title="Using sample data">
-            <span aria-hidden="true" /> Demo mode
+          <div className="web-badge" title="Interactive product showcase">
+            <span aria-hidden="true" /> Web showcase
           </div>
-          <Link className="connect-button" href="/connect">Connect OpenAI</Link>
+          <a
+            className="github-button"
+            href="https://github.com/hydroLB/shipcon_icon"
+            target="_blank"
+            rel="noreferrer"
+          >
+            View on GitHub
+          </a>
           <a
             className="download-button"
             href="https://github.com/hydroLB/shipcon_icon/releases/latest"
@@ -156,10 +162,10 @@ export default function Home() {
         <details className="technical-details">
           <summary>Technical setup</summary>
           <div className="technical-grid">
-            <div><span>Project folder</span><code>demo://shipicon-showcase</code></div>
+            <div><span>Project folder</span><code>showcase://shipicon</code></div>
             <div><span>Workspace</span><code>browser-workspace/shipicon-build</code></div>
             <div><span>Source mode</span><code>Existing image · 1 candidate · best</code></div>
-            <div><span>Build mode</span><code>Demo</code></div>
+            <div><span>Build mode</span><code>Browser showcase</code></div>
           </div>
         </details>
 
@@ -304,7 +310,7 @@ export default function Home() {
           >
             <div className="dialog-header">
               <div>
-                <span className="eyebrow">Demo mode</span>
+                <span className="eyebrow">Sample project</span>
                 <h2 id="sample-title">Showcase project</h2>
               </div>
               <button type="button" className="close-button" onClick={() => setShowSamples(false)} aria-label="Close">×</button>

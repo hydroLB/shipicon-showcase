@@ -8,7 +8,7 @@ An intentionally separate, synthetic-data-only web presentation of the ShipIcon 
 - It does not import ShipIcon source code or modify the desktop package.
 - It contains no OpenAI SDK, API endpoint, environment variable, or credential input.
 - Its interactions are deterministic and use only bundled synthetic data.
-- Visitors do not need to sign in or connect a ChatGPT account to use the showcase.
+- Visitors do not need an account to use the showcase.
 - The only product download link points to the complete desktop application.
 
 If this showcase is abandoned, deleting this directory has no effect on ShipIcon.
