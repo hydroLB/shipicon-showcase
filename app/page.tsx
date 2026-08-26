@@ -31,9 +31,12 @@ export default function Home() {
   const [sourceName, setSourceName] = useState<string | null>(null);
   const [selected, setSelected] = useState(0);
   const [generationState, setGenerationState] = useState<GenerationState>('idle');
+  const [refinePrompt, setRefinePrompt] = useState('');
+  const [isRefining, setIsRefining] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const alive = useRef(true);
+  const refineField = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => () => {
     alive.current = false;
@@ -76,6 +79,18 @@ export default function Home() {
     setGenerationState('done');
   }
 
+  async function refine() {
+    if (!refinePrompt.trim() || isRefining) return;
+    setIsRefining(true);
+    await wait(800);
+    if (!alive.current) return;
+    setSelected((current) => (current + 1) % icons.length);
+    setRefinePrompt('');
+    if (refineField.current) refineField.current.style.height = '';
+    setGenerationState('done');
+    setIsRefining(false);
+  }
+
   const selectedIcon = icons[selected];
   const previewSource = sourcePreview || selectedIcon.src;
 
@@ -93,9 +108,9 @@ export default function Home() {
       </header>
 
       <section className="intro" id="top">
-        <p className="kicker">App icons without the busywork</p>
-        <h1>Put in a project.<br />Get an icon.</h1>
-        <p>Describe a new icon, or add an image and say what to change.</p>
+        <p className="kicker">Icon creation, streamlined</p>
+        <h1>From project to<br />polished icon.</h1>
+        <p>Describe what you want, or start with an image and shape it in your own words.</p>
       </section>
 
       <section className="studio" aria-label="ShipIcon workspace">
@@ -189,10 +204,30 @@ export default function Home() {
           <button className="hero-icon" type="button" onClick={() => setShowPreview(true)} aria-label="Open large icon preview">
             <Image src={selectedIcon.src} width={280} height={280} alt={`${selectedIcon.name} icon`} priority />
           </button>
-          <p className="preview-hint">Tap the icon for a closer look</p>
+
+          <div className="refine-area">
+            <label htmlFor="refine-icon">Refine this icon</label>
+            <div className="refine-box">
+              <textarea
+                ref={refineField}
+                id="refine-icon"
+                rows={1}
+                value={refinePrompt}
+                placeholder="Make the waves softer…"
+                onChange={(event) => {
+                  setRefinePrompt(event.target.value);
+                  event.target.style.height = '0px';
+                  event.target.style.height = `${Math.min(event.target.scrollHeight, 132)}px`;
+                }}
+              />
+              <button type="button" disabled={!refinePrompt.trim() || isRefining} onClick={() => void refine()}>
+                {isRefining ? <span className="spinner" aria-label="Refining" /> : 'Refine'}
+              </button>
+            </div>
+          </div>
 
           <div className="library-heading">
-            <div><h3>Your icons</h3><p>Select one to refine it.</p></div>
+            <div><h3>Your icons</h3><p>Choose a direction.</p></div>
             <span>{icons.length} ideas</span>
           </div>
           <div className="icon-library" aria-label="Generated icon ideas">

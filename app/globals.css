@@ -93,10 +93,19 @@ button:focus-visible, textarea:focus-visible, label:has(input:focus-visible), a:
 .preview-topline span { color: var(--muted); font-size: 12px; }
 .preview-topline strong { font-size: 16px; letter-spacing: -.02em; }
 .ready-badge { border-radius: 999px; background: rgba(48, 183, 96, .12); color: #168c40 !important; padding: 7px 11px; font-weight: 700; }
-.hero-icon { width: 324px; height: 324px; display: grid; place-items: center; margin: 28px 0 4px; border: 0; border-radius: 38px; background: rgba(255, 255, 255, .58); cursor: zoom-in; transition: transform .18s ease, box-shadow .18s ease; }
+.hero-icon { width: 324px; height: 324px; display: grid; place-items: center; margin: 22px 0 12px; border: 0; border-radius: 38px; background: rgba(255, 255, 255, .58); cursor: zoom-in; transition: transform .18s ease, box-shadow .18s ease; }
 .hero-icon:hover { transform: scale(1.012); box-shadow: 0 15px 40px rgba(49, 67, 99, .09); }
 .hero-icon img { width: 250px; height: 250px; border-radius: 56px; box-shadow: 0 22px 44px rgba(15, 61, 114, .22); }
-.preview-hint { margin: 5px 0 28px; color: var(--muted); font-size: 12px; }
+.refine-area { width: min(430px, 100%); margin: 0 0 26px; }
+.refine-area > label { display: block; margin: 0 0 7px 4px; color: #4a5260; font-size: 13px; font-weight: 700; }
+.refine-box { display: flex; align-items: flex-end; gap: 7px; border: 1px solid var(--line); border-radius: 17px; background: rgba(255, 255, 255, .88); padding: 6px; box-shadow: 0 5px 18px rgba(39, 49, 70, .07); }
+.refine-box:focus-within { border-color: rgba(8, 124, 255, .46); box-shadow: 0 0 0 3px rgba(8, 124, 255, .10), 0 5px 18px rgba(39, 49, 70, .07); }
+.refine-box textarea { min-width: 0; min-height: 38px; max-height: 132px; flex: 1; resize: none; overflow-y: auto; border: 0; outline: 0; background: transparent; padding: 9px 8px 8px; color: var(--ink); font-size: 15px; line-height: 21px; }
+.refine-box textarea::placeholder { color: #9ca3ad; }
+.refine-box button { min-width: 72px; min-height: 38px; display: grid; place-items: center; border: 0; border-radius: 12px; background: var(--ink); color: white; padding: 0 13px; font-size: 13px; font-weight: 700; cursor: pointer; }
+.refine-box button:hover { background: #30343d; }
+.refine-box button:disabled { cursor: default; opacity: .38; }
+.refine-box .spinner { width: 14px; height: 14px; }
 .library-heading { width: 100%; display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; margin-top: auto; }
 .library-heading h3 { margin: 0 0 3px; font-size: 17px; letter-spacing: -.02em; }
 .library-heading p, .library-heading > span { margin: 0; color: var(--muted); font-size: 12px; }
