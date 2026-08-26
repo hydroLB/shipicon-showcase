@@ -108,9 +108,7 @@ export default function Home() {
       </header>
 
       <section className="intro" id="top">
-        <p className="kicker">Icon creation, streamlined</p>
-        <h1>From project to<br />polished icon.</h1>
-        <p>Describe what you want, or start with an image and shape it in your own words.</p>
+        <h1>Attach your project,<br />create your icon.</h1>
       </section>
 
       <section className="studio" aria-label="ShipIcon workspace">
