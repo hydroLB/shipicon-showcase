@@ -1,367 +1,231 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
+import { ChangeEvent, DragEvent, useEffect, useRef, useState } from 'react';
 
-type BuildState = 'ready' | 'building' | 'complete';
+type GenerationState = 'idle' | 'creating' | 'done';
 
-const previewSizes = [16, 24, 32, 48, 64, 128, 256, 512, 1024];
-const candidates = [
+const icons = [
   { name: 'Original', src: '/shipicon-demo-source.png' },
-  { name: 'Flat', src: '/shipicon-variation-01.png' },
-  { name: 'Neon', src: '/shipicon-variation-02.png' },
-  { name: 'Minimal', src: '/shipicon-variation-03.png' },
-  { name: 'Isometric', src: '/shipicon-variation-04.png' },
+  { name: 'Ocean', src: '/shipicon-variation-01.png' },
+  { name: 'Night', src: '/shipicon-variation-02.png' },
+  { name: 'Simple', src: '/shipicon-variation-03.png' },
+  { name: 'Depth', src: '/shipicon-variation-04.png' },
   { name: 'Blueprint', src: '/shipicon-variation-05.png' },
-  { name: 'Eco', src: '/shipicon-variation-06.png' },
-  { name: 'Retro', src: '/shipicon-variation-07.png' },
+  { name: 'Fresh', src: '/shipicon-variation-06.png' },
+  { name: 'Classic', src: '/shipicon-variation-07.png' },
   { name: 'Glass', src: '/shipicon-variation-08.png' },
   { name: 'Pixel', src: '/shipicon-variation-09.png' },
   { name: 'Metal', src: '/shipicon-variation-10.png' },
 ] as const;
-const buildSteps = [
-  [12, 'Scanning sample project…'],
-  [34, 'Creating deterministic visual brief…'],
-  [62, 'Normalizing source artwork…'],
-  [84, 'Encoding PNG, ICO, and ICNS assets…'],
-  [100, 'Icons generated.'],
-] as const;
 
-function sleep(milliseconds: number) {
+function wait(milliseconds: number) {
   return new Promise((resolve) => window.setTimeout(resolve, milliseconds));
 }
 
 export default function Home() {
-  const [buildState, setBuildState] = useState<BuildState>('ready');
-  const [progress, setProgress] = useState(0);
-  const [status, setStatus] = useState('Ready.');
-  const [feedback, setFeedback] = useState('Ready.');
-  const [appName, setAppName] = useState('ShipIcon');
+  const [projectName, setProjectName] = useState('ShipIcon');
+  const [projectReady, setProjectReady] = useState(true);
+  const [prompt, setPrompt] = useState('A friendly cargo ship cutting through bright blue waves, bold shape, polished app icon');
+  const [sourcePreview, setSourcePreview] = useState<string | null>(null);
+  const [sourceName, setSourceName] = useState<string | null>(null);
+  const [selected, setSelected] = useState(0);
+  const [generationState, setGenerationState] = useState<GenerationState>('idle');
   const [showPreview, setShowPreview] = useState(false);
-  const [selectedCandidate, setSelectedCandidate] = useState(0);
-  const [showSamples, setShowSamples] = useState(false);
-  const [logs, setLogs] = useState([
-    'SHOWCASE Sample project loaded.',
-  ]);
+  const [isDragging, setIsDragging] = useState(false);
   const alive = useRef(true);
 
   useEffect(() => () => {
     alive.current = false;
-  }, []);
+    if (sourcePreview) URL.revokeObjectURL(sourcePreview);
+  }, [sourcePreview]);
 
-  async function runBuild() {
-    if (buildState === 'building') return;
-    setBuildState('building');
-    setProgress(3);
-    setStatus('Preparing build…');
-    setFeedback('Generating icon set…');
-    setLogs(['INFO shipicon.pipeline: Starting icon generation.']);
-
-    for (const [nextProgress, message] of buildSteps) {
-      await sleep(420);
-      if (!alive.current) return;
-      setProgress(nextProgress);
-      setStatus(message);
-      setLogs((current) => [...current, `INFO shipicon.pipeline: ${message}`]);
-    }
-
-    setBuildState('complete');
-    setSelectedCandidate(1);
-    setFeedback('Icon set generated.');
+  function setProjectFromFiles(files: FileList | File[]) {
+    const first = files[0];
+    if (!first) return;
+    const relativePath = 'webkitRelativePath' in first ? first.webkitRelativePath : '';
+    const folder = relativePath.split('/')[0];
+    setProjectName(folder || first.name.replace(/\.[^/.]+$/, '') || 'My project');
+    setProjectReady(true);
   }
 
-  function resetBuild() {
-    setBuildState('ready');
-    setProgress(0);
-    setSelectedCandidate(0);
-    setStatus('Ready.');
-    setFeedback('Ready.');
-    setLogs(['SHOWCASE Sample project loaded.']);
+  function chooseProject(event: ChangeEvent<HTMLInputElement>) {
+    if (event.target.files) setProjectFromFiles(event.target.files);
   }
 
-  useEffect(() => {
-    function handleShortcut(event: KeyboardEvent) {
-      if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
-        event.preventDefault();
-        void runBuild();
-      }
-      if (event.key === 'Escape') {
-        setShowPreview(false);
-        setShowSamples(false);
-      }
-    }
-    window.addEventListener('keydown', handleShortcut);
-    return () => window.removeEventListener('keydown', handleShortcut);
-  });
+  function dropProject(event: DragEvent<HTMLLabelElement>) {
+    event.preventDefault();
+    setIsDragging(false);
+    if (event.dataTransfer.files.length) setProjectFromFiles(event.dataTransfer.files);
+  }
 
-  const isComplete = buildState === 'complete';
-  const selectedIcon = candidates[selectedCandidate];
+  function chooseSource(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    if (sourcePreview) URL.revokeObjectURL(sourcePreview);
+    setSourcePreview(URL.createObjectURL(file));
+    setSourceName(file.name);
+  }
+
+  async function generate() {
+    if (!projectReady || !prompt.trim() || generationState === 'creating') return;
+    setGenerationState('creating');
+    await wait(1100);
+    if (!alive.current) return;
+    setSelected((current) => (current + 1) % icons.length);
+    setGenerationState('done');
+  }
+
+  const selectedIcon = icons[selected];
+  const previewSource = sourcePreview || selectedIcon.src;
 
   return (
-    <main className="app-shell">
-      <header className="app-header">
-        <div>
-          <h1>ShipIcon</h1>
-          <p>Generate production-ready PNG, ICO, and ICNS assets with consistent defaults.</p>
-        </div>
-        <div className="header-actions">
-          <div className="web-badge" title="Interactive product showcase">
-            <span aria-hidden="true" /> Web showcase
-          </div>
-          <a
-            className="github-button"
-            href="https://github.com/hydroLB/shipcon_icon"
-            target="_blank"
-            rel="noreferrer"
-          >
-            View on GitHub
-          </a>
-          <a
-            className="download-button"
-            href="https://github.com/hydroLB/shipcon_icon/releases/latest"
-            rel="noreferrer"
-          >
-            Download full app
-          </a>
-        </div>
+    <main className="site-shell">
+      <header className="topbar">
+        <a className="brand" href="#top" aria-label="ShipIcon home">
+          <Image src="/shipicon-demo-source.png" width={34} height={34} alt="" priority />
+          <span>ShipIcon</span>
+        </a>
+        <nav aria-label="Project links">
+          <a className="quiet-link" href="https://github.com/hydroLB/shipicon-showcase" target="_blank" rel="noreferrer">GitHub</a>
+          <a className="download-link" href="https://github.com/hydroLB/shipcon_icon/releases/latest" rel="noreferrer">Download app</a>
+        </nav>
       </header>
 
-      <section className="card setup-card" aria-labelledby="setup-title">
-        <div className="section-heading">
-          <div>
-            <span className="eyebrow">Step 1</span>
-            <h2 id="setup-title">Choose the input</h2>
-          </div>
-        </div>
-
-        <div className="setup-grid">
-          <div className="setup-item">
-            <span>Project</span>
-            <strong>ShipIcon sample project</strong>
-            <small>Python · desktop utility</small>
-          </div>
-          <label className="setup-item" htmlFor="app-name">
-            <span>App name</span>
-            <input
-              id="app-name"
-              value={appName}
-              maxLength={64}
-              onChange={(event) => setAppName(event.target.value)}
-            />
-          </label>
-          <button type="button" className="setup-item source-summary" onClick={() => setShowSamples(true)}>
-            <Image src="/shipicon-demo-source.png" width={42} height={42} alt="" />
-            <span>
-              <small>Source artwork</small>
-              <strong>Sample artwork</strong>
-              <em>Change artwork</em>
-            </span>
-          </button>
-        </div>
-
-        <details className="technical-details">
-          <summary>Technical setup</summary>
-          <div className="technical-grid">
-            <div><span>Project folder</span><code>showcase://shipicon</code></div>
-            <div><span>Workspace</span><code>browser-workspace/shipicon-build</code></div>
-            <div><span>Source mode</span><code>Existing image · 1 candidate · best</code></div>
-            <div><span>Build mode</span><code>Browser showcase</code></div>
-          </div>
-        </details>
-
-        <p className={`feedback ${isComplete ? 'success' : ''}`} role="status">
-          <span aria-hidden="true">●</span> {feedback}
-        </p>
+      <section className="intro" id="top">
+        <p className="kicker">App icons without the busywork</p>
+        <h1>Put in a project.<br />Get an icon.</h1>
+        <p>Describe a new icon, or add an image and say what to change.</p>
       </section>
 
-      <section className="card focus-workspace" aria-label="Icon generation workspace">
-        <div className="focus-preview">
-          <span className="eyebrow">Live preview</span>
-          <button type="button" className="icon-stage" onClick={() => setShowPreview(true)}>
-            <Image
-              src={selectedIcon.src}
-              width={148}
-              height={148}
-              alt={`${appName || 'ShipIcon'} ${selectedIcon.name.toLowerCase()} icon preview`}
-              priority
-            />
-            <span>Open larger preview</span>
-          </button>
-          <h2>{appName || 'Untitled app'}</h2>
-          <p>One source, nine production sizes.</p>
+      <section className="studio" aria-label="ShipIcon workspace">
+        <div className="controls">
+          <div className="control-heading">
+            <span className="step-number">1</span>
+            <div>
+              <h2>Your project</h2>
+              <p>Choose the folder the icon belongs to.</p>
+            </div>
+          </div>
 
-          {isComplete && (
-            <section className="candidate-picker" aria-labelledby="candidate-title">
-              <div className="candidate-heading">
-                <strong id="candidate-title">Choose a variation</strong>
-                <span>{selectedCandidate + 1} of {candidates.length}</span>
-              </div>
-              <div className="candidate-strip">
-                {candidates.map((candidate, index) => (
-                  <button
-                    type="button"
-                    className={index === selectedCandidate ? 'selected' : ''}
-                    key={candidate.name}
-                    aria-pressed={index === selectedCandidate}
-                    onClick={() => setSelectedCandidate(index)}
-                  >
-                    <Image src={candidate.src} width={58} height={58} alt="" />
-                    <span>{candidate.name}</span>
-                  </button>
-                ))}
-              </div>
-            </section>
+          <label
+            className={`project-drop ${isDragging ? 'dragging' : ''}`}
+            onDragEnter={() => setIsDragging(true)}
+            onDragLeave={() => setIsDragging(false)}
+            onDragOver={(event) => event.preventDefault()}
+            onDrop={dropProject}
+          >
+            <input
+              type="file"
+              multiple
+              {...({ webkitdirectory: '' } as Record<string, string>)}
+              onChange={chooseProject}
+            />
+            <span className="folder-symbol" aria-hidden="true">⌁</span>
+            <span className="project-copy">
+              <strong>{projectReady ? projectName : 'Choose project folder'}</strong>
+              <small>{projectReady ? 'Ready for an icon' : 'Drop a folder here or browse'}</small>
+            </span>
+            <span className="choose-pill">{projectReady ? 'Change' : 'Choose'}</span>
+          </label>
+
+          <div className="divider" />
+
+          <div className="control-heading">
+            <span className="step-number">2</span>
+            <div>
+              <h2>What should it look like?</h2>
+              <p>Write naturally. You can refine it again afterward.</p>
+            </div>
+          </div>
+
+          {sourceName && (
+            <div className="source-chip">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={previewSource} alt="Selected source" />
+              <span><strong>Editing this image</strong><small>{sourceName}</small></span>
+              <button type="button" aria-label="Remove source image" onClick={() => {
+                if (sourcePreview) URL.revokeObjectURL(sourcePreview);
+                setSourcePreview(null);
+                setSourceName(null);
+              }}>×</button>
+            </div>
           )}
 
-          <details className="size-disclosure">
-            <summary>See all export sizes</summary>
-            <div className="size-grid">
-              {previewSizes.map((size) => (
-                <figure key={size}>
-                  <div><Image src={selectedIcon.src} width={32} height={32} alt="" /></div>
-                  <figcaption>{size}px</figcaption>
-                </figure>
-              ))}
-            </div>
-          </details>
-        </div>
-
-        <div className={`action-panel ${buildState}`} aria-live="polite">
-          {buildState === 'ready' && (
-            <>
-              <span className="eyebrow">Step 2</span>
-              <h2>Generate the icon set</h2>
-              <p>Run the sample workflow and inspect the same outputs the desktop app creates.</p>
-              <ul className="trust-list">
-                <li><span>1</span> sample project</li>
-                <li><span>3</span> production formats</li>
-                <li><span>9</span> preview sizes</li>
-              </ul>
+          <div className="prompt-box">
+            <textarea
+              value={prompt}
+              onChange={(event) => setPrompt(event.target.value)}
+              aria-label="Describe your icon"
+              placeholder="For example: a calm blue wave, simple, soft lighting, no text"
+              rows={5}
+            />
+            <div className="prompt-actions">
+              <label className="image-button">
+                <input type="file" accept="image/png,image/jpeg,image/webp" onChange={chooseSource} />
+                <span aria-hidden="true">＋</span> {sourceName ? 'Change image' : 'Add an image'}
+              </label>
               <button
                 type="button"
-                className="primary-button action-primary"
-                disabled={!appName.trim()}
-                onClick={() => void runBuild()}
+                className="generate-button"
+                disabled={!projectReady || !prompt.trim() || generationState === 'creating'}
+                onClick={() => void generate()}
               >
-                Generate icons
+                {generationState === 'creating' ? <><span className="spinner" aria-hidden="true" /> Creating…</> : generationState === 'done' ? 'Create another' : 'Create icon'}
               </button>
-              <small>Ctrl/⌘ + Enter</small>
-            </>
-          )}
+            </div>
+          </div>
+        </div>
 
-          {buildState === 'building' && (
-            <>
-              <span className="eyebrow">Building</span>
-              <div className="working-mark" aria-hidden="true"><span /></div>
-              <h2>{status}</h2>
-              <p>Building the sample icon set.</p>
-              <div
-                className="progress-track large"
-                role="progressbar"
-                aria-label="Build progress"
-                aria-valuenow={progress}
-                aria-valuemin={0}
-                aria-valuemax={100}
+        <div className="preview-area" aria-live="polite">
+          <div className="preview-topline">
+            <div>
+              <span>Preview</span>
+              <strong>{projectName}</strong>
+            </div>
+            {generationState === 'done' && <span className="ready-badge">Ready</span>}
+          </div>
+
+          <button className="hero-icon" type="button" onClick={() => setShowPreview(true)} aria-label="Open large icon preview">
+            <Image src={selectedIcon.src} width={280} height={280} alt={`${selectedIcon.name} icon`} priority />
+          </button>
+          <p className="preview-hint">Tap the icon for a closer look</p>
+
+          <div className="library-heading">
+            <div><h3>Your icons</h3><p>Select one to refine it.</p></div>
+            <span>{icons.length} ideas</span>
+          </div>
+          <div className="icon-library" aria-label="Generated icon ideas">
+            {icons.map((icon, index) => (
+              <button
+                type="button"
+                key={icon.name}
+                className={index === selected ? 'selected' : ''}
+                aria-label={`Use ${icon.name} icon`}
+                aria-pressed={index === selected}
+                onClick={() => {
+                  setSelected(index);
+                  setGenerationState('done');
+                }}
               >
-                <span style={{ width: `${progress}%` }} />
-              </div>
-              <strong className="progress-value">{progress}%</strong>
-            </>
-          )}
-
-          {buildState === 'complete' && (
-            <>
-              <span className="eyebrow success-text">Build complete</span>
-              <h2>{selectedIcon.name} selected</h2>
-              <p>Compare the generated candidates, then keep the direction you prefer.</p>
-              <div className="result-summary" aria-label="Generated formats">
-                <span><strong>PNG</strong> 1024px RGBA</span>
-                <span><strong>ICO</strong> Windows</span>
-                <span><strong>ICNS</strong> macOS</span>
-              </div>
-              <div className="complete-actions">
-                <button type="button" className="secondary-button" onClick={resetBuild}>Start over</button>
-                <a
-                  className="download-button"
-                  href="https://github.com/hydroLB/shipcon_icon/releases/latest"
-                  rel="noreferrer"
-                >
-                  Get the full app
-                </a>
-              </div>
-            </>
-          )}
+                <Image src={icon.src} width={70} height={70} alt="" />
+              </button>
+            ))}
+          </div>
         </div>
       </section>
 
-      <details className="diagnostics card">
-        <summary>Activity details</summary>
-        <pre aria-live="polite">{logs.join('\n')}</pre>
-      </details>
-
-      {showSamples && (
-        <div className="modal-backdrop" role="presentation" onMouseDown={() => setShowSamples(false)}>
-          <section
-            className="dialog"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="sample-title"
-            onMouseDown={(event) => event.stopPropagation()}
-          >
-            <div className="dialog-header">
-              <div>
-                <span className="eyebrow">Sample project</span>
-                <h2 id="sample-title">Showcase project</h2>
-              </div>
-              <button type="button" className="close-button" onClick={() => setShowSamples(false)} aria-label="Close">×</button>
-            </div>
-            <div className="sample-card">
-              <Image
-                src="/shipicon-demo-source.png"
-                width={76}
-                height={76}
-                alt="ShipIcon sample project artwork"
-              />
-              <div>
-                <strong>ShipIcon sample project</strong>
-                <p>A bundled sample project for exploring the workflow.</p>
-                <span>Python · Desktop utility · Bundled sample</span>
-              </div>
-            </div>
-            <button type="button" className="primary-button dialog-action" onClick={() => {
-              resetBuild();
-              setShowSamples(false);
-              setFeedback('Sample project selected.');
-            }}>Use sample project</button>
-          </section>
-        </div>
-      )}
+      <footer>
+        <p>Want to use your own AI provider and export every size?</p>
+        <a href="https://github.com/hydroLB/shipcon_icon/releases/latest" rel="noreferrer">Download ShipIcon</a>
+      </footer>
 
       {showPreview && (
         <div className="modal-backdrop" role="presentation" onMouseDown={() => setShowPreview(false)}>
-          <section
-            className="dialog preview-dialog"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="preview-title"
-            onMouseDown={(event) => event.stopPropagation()}
-          >
-            <div className="dialog-header">
-              <div>
-                <span className="eyebrow">Generated output</span>
-                <h2 id="preview-title">{appName || 'ShipIcon'} · {selectedIcon.name}</h2>
-              </div>
-              <button type="button" className="close-button" onClick={() => setShowPreview(false)} aria-label="Close">×</button>
-            </div>
-            <div className="large-icon-preview">
-              <Image
-                src={selectedIcon.src}
-                width={384}
-                height={384}
-                alt={`${selectedIcon.name} generated icon preview`}
-              />
-            </div>
-            <p className="dialog-note">Download the full desktop app to process your own project.</p>
+          <section className="preview-modal" role="dialog" aria-modal="true" aria-label="Large icon preview" onMouseDown={(event) => event.stopPropagation()}>
+            <button className="modal-close" type="button" onClick={() => setShowPreview(false)} aria-label="Close preview">×</button>
+            <Image src={selectedIcon.src} width={560} height={560} alt={`${selectedIcon.name} icon large preview`} />
+            <div><strong>{projectName}</strong><span>{selectedIcon.name}</span></div>
           </section>
         </div>
       )}
