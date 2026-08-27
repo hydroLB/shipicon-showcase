@@ -50,7 +50,7 @@ button:focus-visible, textarea:focus-visible, label:has(input:focus-visible), a:
 .intro h1 { margin: 0; font-size: clamp(38px, 6vh, 62px); line-height: .98; letter-spacing: -.065em; font-weight: 780; }
 .intro > p:last-child { max-width: 580px; margin: 22px auto 0; color: var(--muted); font-size: 20px; line-height: 1.4; letter-spacing: -.015em; }
 
-.studio { min-height: 0; height: calc(100% - 14px); display: grid; grid-template-columns: minmax(0, .9fr) minmax(430px, 1.1fr); overflow: hidden; border: 1px solid rgba(28, 38, 57, .09); border-radius: 32px; background: var(--card); box-shadow: 0 28px 80px rgba(38, 49, 73, .12), inset 0 1px 0 #fff; backdrop-filter: blur(24px); }
+.studio { min-height: 0; height: min(680px, calc(100% - 14px)); max-height: 680px; align-self: start; display: grid; grid-template-columns: minmax(0, .9fr) minmax(430px, 1.1fr); overflow: hidden; border: 1px solid rgba(28, 38, 57, .09); border-radius: 32px; background: var(--card); box-shadow: 0 28px 80px rgba(38, 49, 73, .12), inset 0 1px 0 #fff; backdrop-filter: blur(24px); }
 .controls { min-height: 0; overflow: hidden; padding: clamp(24px, 3.2vh, 36px); background: rgba(255, 255, 255, .63); }
 .control-heading { display: flex; align-items: flex-start; gap: 14px; }
 .step-number { flex: 0 0 auto; width: 29px; height: 29px; display: grid; place-items: center; border-radius: 50%; background: #e7f2ff; color: var(--blue); font-size: 14px; font-weight: 750; }
