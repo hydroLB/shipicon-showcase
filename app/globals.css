@@ -113,7 +113,7 @@ button:focus-visible, textarea:focus-visible, label:has(input:focus-visible), a:
 .library-heading { width: 100%; display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; margin-top: auto; }
 .library-heading h3 { margin: 0 0 3px; font-size: 17px; letter-spacing: -.02em; }
 .library-heading p, .library-heading > span { margin: 0; color: var(--muted); font-size: 12px; }
-.icon-library { width: 100%; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 7px; margin-top: 9px; }
+.icon-library { width: 100%; display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 7px; margin-top: 9px; }
 .icon-library button { min-width: 0; aspect-ratio: 1; display: grid; place-items: center; border: 2px solid transparent; border-radius: 18px; background: rgba(255, 255, 255, .58); padding: 6px; cursor: pointer; }
 .icon-library button:hover { background: white; }
 .icon-library button.selected { border-color: var(--blue); background: white; box-shadow: 0 5px 16px rgba(8, 124, 255, .15); }
@@ -168,7 +168,7 @@ footer a:hover { text-decoration: underline; }
   .preview-area { min-height: 590px; padding: 27px 18px; }
   .hero-icon { width: min(300px, 100%); height: 300px; }
   .hero-icon img { width: 225px; height: 225px; border-radius: 50px; }
-  .icon-library { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .icon-library { grid-template-columns: repeat(5, minmax(0, 1fr)); }
   footer { flex-direction: column; gap: 3px; }
   footer p { margin: 0; }
 }

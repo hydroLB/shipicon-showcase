@@ -17,7 +17,18 @@ const icons = [
   { name: 'Glass', src: '/shipicon-variation-08.png' },
   { name: 'Pixel', src: '/shipicon-variation-09.png' },
   { name: 'Metal', src: '/shipicon-variation-10.png' },
+  { name: 'Current', src: '/shipicon-variation-11.png' },
 ] as const;
+
+function iconSet(slug: string, original: string, generatedCount: number) {
+  return [
+    { name: 'Original', src: original },
+    ...Array.from({ length: generatedCount }, (_, index) => ({
+      name: `Direction ${index + 1}`,
+      src: `/${slug}-variation-${String(index + 1).padStart(2, '0')}.png`,
+    })),
+  ];
+}
 
 const demoProjects = [
   {
@@ -25,26 +36,40 @@ const demoProjects = [
     summary: 'Desktop icon utility',
     iconSrc: '/shipicon-demo-source.png',
     prompt: 'A friendly cargo ship cutting through bright blue waves, bold shape, polished app icon',
+    icons,
   },
   {
     name: 'Harbor Ops',
     summary: 'Port logistics',
     iconSrc: '/harbor-ops-icon.png',
     prompt: 'A modern harbor control tower overlooking a cargo ship, clean depth, cool blue palette',
+    icons: iconSet('harbor-ops', '/harbor-ops-icon.png', 14),
   },
   {
     name: 'Tideglass',
     summary: 'Marine forecast',
     iconSrc: '/tideglass-icon.png',
     prompt: 'A calm teal wave wrapping around a small vessel, soft glass finish, simple silhouette',
+    icons: iconSet('tideglass', '/tideglass-icon.png', 14),
   },
   {
     name: 'CargoTrack',
     summary: 'Freight tracking',
     iconSrc: '/cargotrack-icon.png',
     prompt: 'A bright container ship with a clear route line, confident geometry, dark ocean background',
+    icons: iconSet('cargotrack', '/cargotrack-icon.png', 14),
   },
-] as const;
+  {
+    name: 'SignalDeck',
+    summary: 'Fleet communications',
+    iconSrc: '/signaldeck-variation-01.png',
+    prompt: 'A marine signal beacon connecting nearby vessels, crisp radio waves, deep blue and coral accents',
+    icons: Array.from({ length: 15 }, (_, index) => ({
+      name: `Direction ${index + 1}`,
+      src: `/signaldeck-variation-${String(index + 1).padStart(2, '0')}.png`,
+    })),
+  },
+];
 
 function wait(milliseconds: number) {
   return new Promise((resolve) => window.setTimeout(resolve, milliseconds));
@@ -113,9 +138,7 @@ export default function Home() {
 
   const currentProject = demoProjects[projectIndex];
   const projectName = currentProject.name;
-  const activeIcons = projectIndex === 0
-    ? icons
-    : [{ name: currentProject.name, src: currentProject.iconSrc }];
+  const activeIcons = currentProject.icons;
   const selectedIcon = activeIcons[selected] || activeIcons[0];
   const previewSource = sourcePreview || selectedIcon.src;
 
@@ -135,7 +158,7 @@ export default function Home() {
       <section className="intro" id="top">
         <h1>Attach your app,<br />create your icon.</h1>
         <a className="intro-download" href="https://github.com/hydroLB/shipcon_icon/releases/latest" rel="noreferrer">
-          Download free now to use
+          Download free to use
         </a>
       </section>
 
@@ -277,7 +300,7 @@ export default function Home() {
             <button className="modal-close" type="button" onClick={() => setShowProjects(false)} aria-label="Close project picker">×</button>
             <span className="modal-eyebrow">Switch project</span>
             <h2 id="project-modal-title">Choose another app</h2>
-            <p>Three prepared projects are available in this showcase.</p>
+            <p>Four prepared apps are ready to explore.</p>
             <div className="project-options">
               {demoProjects.map((project, index) => index === projectIndex ? null : (
                 <button type="button" key={project.name} onClick={() => switchProject(index)}>
