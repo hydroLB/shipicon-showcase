@@ -23,25 +23,25 @@ const demoProjects = [
   {
     name: 'ShipIcon',
     summary: 'Desktop icon utility',
-    iconIndex: 0,
+    iconSrc: '/shipicon-demo-source.png',
     prompt: 'A friendly cargo ship cutting through bright blue waves, bold shape, polished app icon',
   },
   {
     name: 'Harbor Ops',
     summary: 'Port logistics',
-    iconIndex: 4,
+    iconSrc: '/harbor-ops-icon.png',
     prompt: 'A modern harbor control tower overlooking a cargo ship, clean depth, cool blue palette',
   },
   {
     name: 'Tideglass',
     summary: 'Marine forecast',
-    iconIndex: 6,
+    iconSrc: '/tideglass-icon.png',
     prompt: 'A calm teal wave wrapping around a small vessel, soft glass finish, simple silhouette',
   },
   {
     name: 'CargoTrack',
     summary: 'Freight tracking',
-    iconIndex: 8,
+    iconSrc: '/cargotrack-icon.png',
     prompt: 'A bright container ship with a clear route line, confident geometry, dark ocean background',
   },
 ] as const;
@@ -82,7 +82,7 @@ export default function Home() {
     setGenerationState('creating');
     await wait(1100);
     if (!alive.current) return;
-    setSelected((current) => (current + 1) % icons.length);
+    setSelected((current) => (current + 1) % activeIcons.length);
     setGenerationState('done');
   }
 
@@ -91,7 +91,7 @@ export default function Home() {
     setIsRefining(true);
     await wait(800);
     if (!alive.current) return;
-    setSelected((current) => (current + 1) % icons.length);
+    setSelected((current) => (current + 1) % activeIcons.length);
     setRefinePrompt('');
     if (refineField.current) refineField.current.style.height = '';
     setGenerationState('done');
@@ -103,7 +103,7 @@ export default function Home() {
     if (sourcePreview) URL.revokeObjectURL(sourcePreview);
     setProjectIndex(index);
     setPrompt(project.prompt);
-    setSelected(project.iconIndex);
+    setSelected(0);
     setGenerationState('idle');
     setRefinePrompt('');
     setSourcePreview(null);
@@ -113,7 +113,10 @@ export default function Home() {
 
   const currentProject = demoProjects[projectIndex];
   const projectName = currentProject.name;
-  const selectedIcon = icons[selected];
+  const activeIcons = projectIndex === 0
+    ? icons
+    : [{ name: currentProject.name, src: currentProject.iconSrc }];
+  const selectedIcon = activeIcons[selected] || activeIcons[0];
   const previewSource = sourcePreview || selectedIcon.src;
 
   return (
@@ -145,7 +148,7 @@ export default function Home() {
 
           <button type="button" className="project-drop" onClick={() => setShowProjects(true)}>
             <span className="folder-symbol" aria-hidden="true">
-              <Image src={icons[currentProject.iconIndex].src} width={48} height={48} alt="" />
+              <Image src={currentProject.iconSrc} width={48} height={48} alt="" />
             </span>
             <span className="project-copy">
               <strong>{projectName}</strong>
@@ -238,10 +241,10 @@ export default function Home() {
 
           <div className="library-heading">
             <div><h3>Your icons</h3><p>Choose a direction.</p></div>
-            <span>{icons.length} ideas</span>
+            <span>{activeIcons.length} {activeIcons.length === 1 ? 'idea' : 'ideas'}</span>
           </div>
           <div className="icon-library" aria-label="Generated icon ideas">
-            {icons.map((icon, index) => (
+            {activeIcons.map((icon, index) => (
               <button
                 type="button"
                 key={icon.name}
@@ -275,7 +278,7 @@ export default function Home() {
             <div className="project-options">
               {demoProjects.map((project, index) => index === projectIndex ? null : (
                 <button type="button" key={project.name} onClick={() => switchProject(index)}>
-                  <Image src={icons[project.iconIndex].src} width={72} height={72} alt="" />
+                  <Image src={project.iconSrc} width={72} height={72} alt="" />
                   <span><strong>{project.name}</strong><small>{project.summary}</small></span>
                   <em aria-hidden="true">›</em>
                 </button>
