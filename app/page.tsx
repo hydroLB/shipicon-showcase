@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { ChangeEvent, DragEvent, useEffect, useRef, useState } from 'react';
+import { ChangeEvent, useEffect, useRef, useState } from 'react';
 
 type GenerationState = 'idle' | 'creating' | 'done';
 
@@ -19,13 +19,39 @@ const icons = [
   { name: 'Metal', src: '/shipicon-variation-10.png' },
 ] as const;
 
+const demoProjects = [
+  {
+    name: 'ShipIcon',
+    summary: 'Desktop icon utility',
+    iconIndex: 0,
+    prompt: 'A friendly cargo ship cutting through bright blue waves, bold shape, polished app icon',
+  },
+  {
+    name: 'Harbor Ops',
+    summary: 'Port logistics',
+    iconIndex: 4,
+    prompt: 'A modern harbor control tower overlooking a cargo ship, clean depth, cool blue palette',
+  },
+  {
+    name: 'Tideglass',
+    summary: 'Marine forecast',
+    iconIndex: 6,
+    prompt: 'A calm teal wave wrapping around a small vessel, soft glass finish, simple silhouette',
+  },
+  {
+    name: 'CargoTrack',
+    summary: 'Freight tracking',
+    iconIndex: 8,
+    prompt: 'A bright container ship with a clear route line, confident geometry, dark ocean background',
+  },
+] as const;
+
 function wait(milliseconds: number) {
   return new Promise((resolve) => window.setTimeout(resolve, milliseconds));
 }
 
 export default function Home() {
-  const [projectName, setProjectName] = useState('ShipIcon');
-  const [projectReady, setProjectReady] = useState(true);
+  const [projectIndex, setProjectIndex] = useState(0);
   const [prompt, setPrompt] = useState('A friendly cargo ship cutting through bright blue waves, bold shape, polished app icon');
   const [sourcePreview, setSourcePreview] = useState<string | null>(null);
   const [sourceName, setSourceName] = useState<string | null>(null);
@@ -33,8 +59,8 @@ export default function Home() {
   const [generationState, setGenerationState] = useState<GenerationState>('idle');
   const [refinePrompt, setRefinePrompt] = useState('');
   const [isRefining, setIsRefining] = useState(false);
+  const [showProjects, setShowProjects] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
-  const [isDragging, setIsDragging] = useState(false);
   const alive = useRef(true);
   const refineField = useRef<HTMLTextAreaElement>(null);
 
@@ -42,25 +68,6 @@ export default function Home() {
     alive.current = false;
     if (sourcePreview) URL.revokeObjectURL(sourcePreview);
   }, [sourcePreview]);
-
-  function setProjectFromFiles(files: FileList | File[]) {
-    const first = files[0];
-    if (!first) return;
-    const relativePath = 'webkitRelativePath' in first ? first.webkitRelativePath : '';
-    const folder = relativePath.split('/')[0];
-    setProjectName(folder || first.name.replace(/\.[^/.]+$/, '') || 'My project');
-    setProjectReady(true);
-  }
-
-  function chooseProject(event: ChangeEvent<HTMLInputElement>) {
-    if (event.target.files) setProjectFromFiles(event.target.files);
-  }
-
-  function dropProject(event: DragEvent<HTMLLabelElement>) {
-    event.preventDefault();
-    setIsDragging(false);
-    if (event.dataTransfer.files.length) setProjectFromFiles(event.dataTransfer.files);
-  }
 
   function chooseSource(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
@@ -71,7 +78,7 @@ export default function Home() {
   }
 
   async function generate() {
-    if (!projectReady || !prompt.trim() || generationState === 'creating') return;
+    if (!prompt.trim() || generationState === 'creating') return;
     setGenerationState('creating');
     await wait(1100);
     if (!alive.current) return;
@@ -91,6 +98,21 @@ export default function Home() {
     setIsRefining(false);
   }
 
+  function switchProject(index: number) {
+    const project = demoProjects[index];
+    if (sourcePreview) URL.revokeObjectURL(sourcePreview);
+    setProjectIndex(index);
+    setPrompt(project.prompt);
+    setSelected(project.iconIndex);
+    setGenerationState('idle');
+    setRefinePrompt('');
+    setSourcePreview(null);
+    setSourceName(null);
+    setShowProjects(false);
+  }
+
+  const currentProject = demoProjects[projectIndex];
+  const projectName = currentProject.name;
   const selectedIcon = icons[selected];
   const previewSource = sourcePreview || selectedIcon.src;
 
@@ -121,26 +143,16 @@ export default function Home() {
             </div>
           </div>
 
-          <label
-            className={`project-drop ${isDragging ? 'dragging' : ''}`}
-            onDragEnter={() => setIsDragging(true)}
-            onDragLeave={() => setIsDragging(false)}
-            onDragOver={(event) => event.preventDefault()}
-            onDrop={dropProject}
-          >
-            <input
-              type="file"
-              multiple
-              {...({ webkitdirectory: '' } as Record<string, string>)}
-              onChange={chooseProject}
-            />
-            <span className="folder-symbol" aria-hidden="true">⌁</span>
-            <span className="project-copy">
-              <strong>{projectReady ? projectName : 'Choose project folder'}</strong>
-              <small>{projectReady ? 'Ready for an icon' : 'Drop a folder here or browse'}</small>
+          <button type="button" className="project-drop" onClick={() => setShowProjects(true)}>
+            <span className="folder-symbol" aria-hidden="true">
+              <Image src={icons[currentProject.iconIndex].src} width={48} height={48} alt="" />
             </span>
-            <span className="choose-pill">{projectReady ? 'Change' : 'Choose'}</span>
-          </label>
+            <span className="project-copy">
+              <strong>{projectName}</strong>
+              <small>{currentProject.summary}</small>
+            </span>
+            <span className="choose-pill">Change</span>
+          </button>
 
           <div className="divider" />
 
@@ -181,7 +193,7 @@ export default function Home() {
               <button
                 type="button"
                 className="generate-button"
-                disabled={!projectReady || !prompt.trim() || generationState === 'creating'}
+                disabled={!prompt.trim() || generationState === 'creating'}
                 onClick={() => void generate()}
               >
                 {generationState === 'creating' ? <><span className="spinner" aria-hidden="true" /> Creating…</> : generationState === 'done' ? 'Create another' : 'Create icon'}
@@ -252,6 +264,26 @@ export default function Home() {
         <p>Want to use your own AI provider and export every size?</p>
         <a href="https://github.com/hydroLB/shipcon_icon/releases/latest" rel="noreferrer">Download ShipIcon</a>
       </footer>
+
+      {showProjects && (
+        <div className="modal-backdrop" role="presentation" onMouseDown={() => setShowProjects(false)}>
+          <section className="project-modal" role="dialog" aria-modal="true" aria-labelledby="project-modal-title" onMouseDown={(event) => event.stopPropagation()}>
+            <button className="modal-close" type="button" onClick={() => setShowProjects(false)} aria-label="Close project picker">×</button>
+            <span className="modal-eyebrow">Switch project</span>
+            <h2 id="project-modal-title">Choose another app</h2>
+            <p>Three prepared projects are available in this showcase.</p>
+            <div className="project-options">
+              {demoProjects.map((project, index) => index === projectIndex ? null : (
+                <button type="button" key={project.name} onClick={() => switchProject(index)}>
+                  <Image src={icons[project.iconIndex].src} width={72} height={72} alt="" />
+                  <span><strong>{project.name}</strong><small>{project.summary}</small></span>
+                  <em aria-hidden="true">›</em>
+                </button>
+              ))}
+            </div>
+          </section>
+        </div>
+      )}
 
       {showPreview && (
         <div className="modal-backdrop" role="presentation" onMouseDown={() => setShowPreview(false)}>

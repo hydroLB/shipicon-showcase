@@ -57,10 +57,11 @@ button:focus-visible, textarea:focus-visible, label:has(input:focus-visible), a:
 .control-heading h2 { margin: 2px 0 4px; font-size: 21px; letter-spacing: -.025em; }
 .control-heading p { margin: 0; color: var(--muted); font-size: 15px; line-height: 1.4; }
 
-.project-drop { min-height: 72px; display: flex; align-items: center; gap: 13px; margin: 14px 0 0 43px; border: 1px solid var(--line); border-radius: 20px; background: white; padding: 10px 12px; cursor: pointer; box-shadow: 0 5px 18px rgba(39, 49, 70, .06); transition: transform .16s ease, border-color .16s ease, box-shadow .16s ease; }
+.project-drop { width: calc(100% - 43px); min-height: 72px; display: flex; align-items: center; gap: 13px; margin: 14px 0 0 43px; border: 1px solid var(--line); border-radius: 20px; background: white; padding: 10px 12px; color: var(--ink); text-align: left; cursor: pointer; box-shadow: 0 5px 18px rgba(39, 49, 70, .06); transition: transform .16s ease, border-color .16s ease, box-shadow .16s ease; }
 .project-drop:hover, .project-drop.dragging { transform: translateY(-1px); border-color: rgba(8, 124, 255, .45); box-shadow: 0 8px 24px rgba(39, 49, 70, .10); }
 .project-drop input, .image-button input { position: absolute; width: 1px; height: 1px; overflow: hidden; opacity: 0; pointer-events: none; }
 .folder-symbol { width: 48px; height: 48px; display: grid; place-items: center; border-radius: 14px; background: linear-gradient(145deg, #e9f4ff, #dcecff); color: var(--blue); font-size: 28px; font-weight: 700; }
+.folder-symbol img { width: 48px; height: 48px; border-radius: 14px; }
 .project-copy { min-width: 0; display: flex; flex: 1; flex-direction: column; gap: 4px; }
 .project-copy strong { overflow: hidden; font-size: 15px; text-overflow: ellipsis; white-space: nowrap; }
 .project-copy small { color: var(--muted); font-size: 13px; }
@@ -122,6 +123,18 @@ footer a:hover { text-decoration: underline; }
 
 .modal-backdrop { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; padding: 24px; background: rgba(16, 20, 28, .68); backdrop-filter: blur(16px); }
 .preview-modal { position: relative; width: min(760px, 100%); display: flex; flex-direction: column; align-items: center; border: 1px solid rgba(255, 255, 255, .65); border-radius: 38px; background: rgba(249, 250, 253, .94); padding: 58px 48px 30px; box-shadow: 0 40px 120px rgba(0, 0, 0, .32); }
+.project-modal { position: relative; width: min(560px, 100%); border: 1px solid rgba(255, 255, 255, .65); border-radius: 32px; background: rgba(249, 250, 253, .96); padding: 34px; box-shadow: 0 40px 120px rgba(0, 0, 0, .32); }
+.modal-eyebrow { color: var(--blue); font-size: 13px; font-weight: 720; }
+.project-modal h2 { margin: 7px 0 5px; font-size: 27px; letter-spacing: -.035em; }
+.project-modal > p { margin: 0; color: var(--muted); font-size: 14px; }
+.project-options { display: grid; gap: 9px; margin-top: 24px; }
+.project-options button { display: grid; grid-template-columns: 58px minmax(0, 1fr) 24px; align-items: center; gap: 13px; border: 1px solid var(--line); border-radius: 19px; background: white; padding: 10px; color: var(--ink); text-align: left; cursor: pointer; }
+.project-options button:hover { border-color: rgba(8, 124, 255, .38); background: #f7fbff; }
+.project-options img { width: 58px; height: 58px; border-radius: 14px; }
+.project-options span { min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.project-options strong { font-size: 15px; }
+.project-options small { color: var(--muted); font-size: 13px; }
+.project-options em { color: #8d96a3; font-size: 27px; font-style: normal; }
 .preview-modal > img { width: min(520px, 68vw); height: auto; border-radius: 23%; box-shadow: 0 30px 70px rgba(15, 48, 90, .25); }
 .preview-modal > div { display: flex; flex-direction: column; align-items: center; gap: 3px; margin-top: 25px; }
 .preview-modal strong { font-size: 19px; }
@@ -147,7 +160,7 @@ footer a:hover { text-decoration: underline; }
   .intro > p:last-child { font-size: 17px; }
   .studio { border-radius: 25px; }
   .controls { padding: 29px 20px 32px; }
-  .project-drop, .prompt-box, .source-chip { margin-left: 0; }
+  .project-drop, .prompt-box, .source-chip { width: 100%; margin-left: 0; }
   .prompt-actions { align-items: stretch; flex-direction: column; }
   .image-button, .generate-button { width: 100%; }
   .preview-area { min-height: 590px; padding: 27px 18px; }
