@@ -133,7 +133,10 @@ export default function Home() {
       </header>
 
       <section className="intro" id="top">
-        <h1>Attach your project,<br />create your icon.</h1>
+        <h1>Attach your app,<br />create your icon.</h1>
+        <a className="intro-download" href="https://github.com/hydroLB/shipcon_icon/releases/latest" rel="noreferrer">
+          Download free now to use
+        </a>
       </section>
 
       <section className="studio" aria-label="ShipIcon workspace">
