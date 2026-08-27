@@ -1,9 +1,12 @@
 'use client';
 
 import Image from 'next/image';
-import { ChangeEvent, useEffect, useRef, useState } from 'react';
+import { ChangeEvent, useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 type GenerationState = 'idle' | 'creating' | 'done';
+
+const GOLDEN_WIDTH = 1242;
+const GOLDEN_HEIGHT = 983;
 
 const icons = [
   { name: 'Original', src: '/shipicon-demo-source.png' },
@@ -76,6 +79,7 @@ function wait(milliseconds: number) {
 }
 
 export default function Home() {
+  const [stageScale, setStageScale] = useState(1);
   const [projectIndex, setProjectIndex] = useState(0);
   const [prompt, setPrompt] = useState('A friendly cargo ship cutting through bright blue waves, bold shape, polished app icon');
   const [sourcePreview, setSourcePreview] = useState<string | null>(null);
@@ -88,6 +92,30 @@ export default function Home() {
   const [showPreview, setShowPreview] = useState(false);
   const alive = useRef(true);
   const refineField = useRef<HTMLTextAreaElement>(null);
+
+  useLayoutEffect(() => {
+    let frame = 0;
+
+    const resize = () => {
+      window.cancelAnimationFrame(frame);
+      frame = window.requestAnimationFrame(() => {
+        setStageScale(Math.min(
+          window.innerWidth / GOLDEN_WIDTH,
+          window.innerHeight / GOLDEN_HEIGHT,
+        ));
+      });
+    };
+
+    resize();
+    window.addEventListener('resize', resize);
+    window.visualViewport?.addEventListener('resize', resize);
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.removeEventListener('resize', resize);
+      window.visualViewport?.removeEventListener('resize', resize);
+    };
+  }, []);
 
   useEffect(() => () => {
     alive.current = false;
@@ -143,7 +171,12 @@ export default function Home() {
   const previewSource = sourcePreview || selectedIcon.src;
 
   return (
-    <main className="site-shell">
+    <main className="viewport-stage">
+      <div
+        className="golden-canvas"
+        style={{ transform: `translate(-50%, -50%) scale(${stageScale})` }}
+      >
+      <div className="site-shell">
       <header className="topbar">
         <a className="brand" href="#top" aria-label="ShipIcon home">
           <Image src="/shipicon-demo-source.png" width={34} height={34} alt="" priority />
@@ -323,6 +356,8 @@ export default function Home() {
           </section>
         </div>
       )}
+      </div>
+      </div>
     </main>
   );
 }
